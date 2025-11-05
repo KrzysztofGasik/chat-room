@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginUserDto } from 'src/dtos/login-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { GetUser } from 'src/decorators/get-user.decorator';
-import type { User } from 'generated/prisma';
+import type { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {

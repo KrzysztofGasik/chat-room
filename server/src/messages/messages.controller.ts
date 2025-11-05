@@ -14,7 +14,7 @@ import { RoomMemberGuard } from 'src/auth/guards/room-member/room-member.guard';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from 'src/dtos/create-message.dto';
 import { GetUser } from 'src/decorators/get-user.decorator';
-import { User } from 'generated/prisma';
+import { User } from '@prisma/client';
 
 @Controller('rooms/:roomId')
 @UseGuards(JwtAuthGuard, RoomMemberGuard)

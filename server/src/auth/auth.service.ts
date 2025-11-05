@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import type { User } from 'generated/prisma';
+import type { User } from '@prisma/client';
 import { CreateUserDto } from 'src/dtos/create-user.dto';
 import { LoginUserDto } from 'src/dtos/login-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
