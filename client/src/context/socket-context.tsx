@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import type { ReactChildren } from '../types';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
+import { useAuthContext } from './auth-context';
 
 export type SocketContextType = {
   socket: Socket | undefined;
@@ -14,13 +15,14 @@ export type SocketContextType = {
 const SocketContext = React.createContext<SocketContextType | null>(null);
 
 export const SocketContextProvider = ({ children }: ReactChildren) => {
+  const { user } = useAuthContext();
   const [socket, setSocket] = useState<Socket>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [onlineUsers, setOnlineUser] = useState<Set<string>>(new Set());
 
   const connect = useCallback(
     (token: string) => {
-      if (!socket) {
+      if (!socket && user) {
         const newSocket = io(
           import.meta.env.VITE_API_URL || 'http://localhost:3000',
           {
@@ -62,7 +64,7 @@ export const SocketContextProvider = ({ children }: ReactChildren) => {
         socket?.connect();
       }
     },
-    [socket]
+    [socket, user]
   );
 
   const disconnect = useCallback(() => {

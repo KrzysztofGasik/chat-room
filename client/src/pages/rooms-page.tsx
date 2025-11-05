@@ -38,7 +38,28 @@ export const RoomsPage = () => {
     return <CircularProgress />;
   }
   if (!data || data.length === 0) {
-    return <Typography>No rooms found</Typography>;
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '50vh',
+          gap: 2,
+        }}
+      >
+        <Typography variant="h5">No rooms found</Typography>
+        <Button
+          variant="contained"
+          onClick={() => setIsOpen(true)}
+          sx={{ margin: 1 }}
+        >
+          Create a room
+        </Button>
+        <CreateRoomDialog onClose={() => setIsOpen(false)} open={isOpen} />
+      </Box>
+    );
   }
 
   return (
@@ -46,7 +67,7 @@ export const RoomsPage = () => {
       sx={{
         p: 2,
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: 'column',
         gap: 2,
       }}
     >
