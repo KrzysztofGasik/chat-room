@@ -1,5 +1,5 @@
 # compiled output
-/dist
+# /dist  # Commented out - we commit dist for Render deployment
 /node_modules
 /build
 
