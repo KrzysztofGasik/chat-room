@@ -12,6 +12,7 @@ import { RoomItem } from '../components/room-item';
 import { useState } from 'react';
 import { CreateRoomDialog } from '../components/create-room-dialog';
 import { useAuthContext } from '../context/auth-context';
+import AddIcon from '@mui/icons-material/Add';
 
 export const RoomsPage = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -77,6 +78,7 @@ export const RoomsPage = () => {
           variant="contained"
           onClick={() => setIsOpen(true)}
           sx={{ margin: 1 }}
+          endIcon={<AddIcon sx={{ color: 'var(--font-color)' }} />}
         >
           Create a room
         </Button>

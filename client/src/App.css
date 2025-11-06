@@ -1,13 +1,19 @@
+:root {
+  --background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+  --font-color: #f0f8ff;
+}
+
 body {
-  color: #000;
+  color: var(--font-color);
   margin: 0;
   height: 100vh;
-  background-color: #ddeeff;
+  background: var(--background);
 }
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  background-color: #fff;
+  color: var(--font-color);
+  background-color: transparent;
 }

@@ -7,6 +7,7 @@ export const MainLayout = ({ children }: ReactChildren) => {
       sx={{
         marginTop: { xs: '56px', md: '64px' },
         height: { xs: 'auto', md: 'calc(100vh - 64px)' },
+        color: 'var(--font-color)',
       }}
     >
       {children}

@@ -44,6 +44,10 @@ export const SignUp = () => {
           fullWidth
           autoComplete="off"
           sx={{ margin: '1rem 0' }}
+          slotProps={{
+            input: { sx: { color: 'var(--font-color)' } },
+            inputLabel: { sx: { color: 'var(--font-color)' } },
+          }}
           {...register('username', { required: true })}
         />
         {errors.username && (
@@ -55,6 +59,10 @@ export const SignUp = () => {
           fullWidth
           autoComplete="off"
           sx={{ margin: '1rem 0' }}
+          slotProps={{
+            input: { sx: { color: 'var(--font-color)' } },
+            inputLabel: { sx: { color: 'var(--font-color)' } },
+          }}
           {...register('email', { required: true })}
         />
         {errors.email && (
@@ -65,7 +73,11 @@ export const SignUp = () => {
           type={showPassword ? 'text' : 'password'}
           fullWidth
           autoComplete="off"
-          helperText="Min 8 chars: uppercase, lowercase, number & special character"
+          helperText={
+            <Typography sx={{ color: 'var(--font-color)' }}>
+              Min 8 chars: uppercase, lowercase, number & special character
+            </Typography>
+          }
           sx={{ margin: '1rem 0' }}
           {...register('password', {
             required: true,
@@ -78,15 +90,21 @@ export const SignUp = () => {
           })}
           slotProps={{
             input: {
+              sx: { color: 'var(--font-color)' },
               endAdornment: (
                 <IconButton
                   title={`${showPassword} ? 'hide the password' : 'display the password'`}
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? (
+                    <VisibilityOff sx={{ color: 'var(--font-color)' }} />
+                  ) : (
+                    <Visibility sx={{ color: 'var(--font-color)' }} />
+                  )}
                 </IconButton>
               ),
             },
+            inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
         />
         {errors.password?.type === 'required' && (
@@ -103,7 +121,10 @@ export const SignUp = () => {
       </form>
 
       <Typography>
-        Already registered? Click here to <Link to={'/signin'}>login</Link>
+        Already registered? Click here to{' '}
+        <Link to={'/signin'} style={{ color: 'var(--font-color)' }}>
+          login
+        </Link>
       </Typography>
     </Box>
   );

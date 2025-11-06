@@ -27,6 +27,10 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
         label="Your message"
         fullWidth
         sx={{ margin: '1rem 0' }}
+        slotProps={{
+          input: { sx: { color: 'var(--font-color)' } },
+          inputLabel: { sx: { color: 'var(--font-color)' } },
+        }}
         {...register('message', {
           required: true,
           onChange: (e) => {

@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { useSnackbarContext } from '../context/snackbar-context';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 type CreateRoomDialogProps = {
   open: boolean;
@@ -62,7 +63,7 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
   });
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} maxWidth="lg">
       <DialogTitle>
         <Typography>Create new room</Typography>
       </DialogTitle>
@@ -73,7 +74,9 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
             type="text"
             fullWidth
             sx={{ margin: '1rem 0' }}
-            {...register('name', { required: true })}
+            {...register('name', {
+              required: true,
+            })}
           />
           {errors.name && (
             <Typography color="error">Room name is required</Typography>
@@ -87,7 +90,13 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
           />
           <DialogActions>
             <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+            <Button
+              type="submit"
+              variant="contained"
+              endIcon={
+                <AddCircleOutlineIcon sx={{ color: 'var(--font-color)' }} />
+              }
+            >
               Create
             </Button>
           </DialogActions>

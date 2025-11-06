@@ -67,28 +67,39 @@ export const Navbar = () => {
           >
             <MenuItem onClick={handleCloseUserMenu}>
               <AccountCircleIcon sx={{ marginRight: 1 }} />
-              <Typography>{user?.username}</Typography>
+              <Typography sx={{ color: '#010101' }}>
+                {user?.username}
+              </Typography>
             </MenuItem>
             <MenuItem onClick={handleCloseUserMenu}>
               <AlternateEmailIcon sx={{ marginRight: 1 }} />
-              <Typography>{user?.email}</Typography>
+              <Typography sx={{ color: '#010101' }}>{user?.email}</Typography>
             </MenuItem>
             <MenuItem onClick={handleCloseUserMenu}>
               <Button
                 onClick={() => navigate('/profile')}
-                endIcon={<AccountBoxIcon />}
+                startIcon={<AccountBoxIcon />}
+                sx={{ color: '#010101' }}
               >
                 Profile
               </Button>
             </MenuItem>
             <MenuItem onClick={handleCloseUserMenu}>
-              <Button onClick={() => navigate('/')} endIcon={<DoorFrontIcon />}>
+              <Button
+                onClick={() => navigate('/')}
+                startIcon={<DoorFrontIcon />}
+                sx={{ color: '#010101' }}
+              >
                 Rooms
               </Button>
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleCloseUserMenu}>
-              <Button onClick={handleLogout} endIcon={<LogoutIcon />}>
+              <Button
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+                sx={{ color: '#010101' }}
+              >
                 Log out
               </Button>
             </MenuItem>

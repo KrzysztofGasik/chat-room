@@ -30,7 +30,9 @@ export const MessageList = ({ isLoading, data, sx }: MessageListProps) => {
   if (data.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
-        <Typography color="info">No messages yet</Typography>
+        <Typography sx={{ color: 'var(--font-color)' }}>
+          No messages yet
+        </Typography>
       </Box>
     );
   }

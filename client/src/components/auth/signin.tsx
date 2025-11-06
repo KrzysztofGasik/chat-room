@@ -1,9 +1,11 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from '../../context/auth-context';
 import { Link, useNavigate } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 import { useSnackbarContext } from '../../context/snackbar-context';
+import { useState } from 'react';
+import { VisibilityOff, Visibility } from '@mui/icons-material';
 
 export const SignIn = () => {
   const {
@@ -13,6 +15,7 @@ export const SignIn = () => {
   } = useForm();
   const { logIn } = useAuthContext();
   const { showSnackbar } = useSnackbarContext();
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = handleSubmit(async (data) => {
@@ -41,6 +44,10 @@ export const SignIn = () => {
           fullWidth
           autoComplete="off"
           sx={{ margin: '1rem 0' }}
+          slotProps={{
+            input: { sx: { color: 'var(--font-color)' } },
+            inputLabel: { sx: { color: 'var(--font-color)' } },
+          }}
           {...register('email', { required: true })}
         />
         {errors.email && (
@@ -48,11 +55,29 @@ export const SignIn = () => {
         )}
         <TextField
           label="Your password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           fullWidth
           autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('password', { required: true })}
+          slotProps={{
+            input: {
+              sx: { color: 'var(--font-color)' },
+              endAdornment: (
+                <IconButton
+                  title={`${showPassword} ? 'hide the password' : 'display the password'`}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <VisibilityOff sx={{ color: 'var(--font-color)' }} />
+                  ) : (
+                    <Visibility sx={{ color: 'var(--font-color)' }} />
+                  )}
+                </IconButton>
+              ),
+            },
+            inputLabel: { sx: { color: 'var(--font-color)' } },
+          }}
         />
         {errors.password && (
           <Typography color="error">Password is required</Typography>
@@ -63,7 +88,10 @@ export const SignIn = () => {
       </form>
 
       <Typography>
-        Not registered? Click here to <Link to={'/signup'}>register</Link>
+        Not registered? Click here to{' '}
+        <Link to={'/signup'} style={{ color: 'var(--font-color)' }}>
+          register
+        </Link>
       </Typography>
     </Box>
   );
