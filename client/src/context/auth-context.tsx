@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import type { ReactChildren, User } from '../types';
 import apiClient from '../api/client';
+import axios from 'axios';
 
 export type AuthContextType = {
   user: User | null;
@@ -13,6 +14,7 @@ export type AuthContextType = {
     email: string,
     password: string
   ) => Promise<void>;
+  updateUser: (user: Partial<User>) => void;
 };
 
 const AuthContext = React.createContext<AuthContextType | null>(null);
@@ -40,6 +42,13 @@ export const AuthContextProvider = ({ children }: ReactChildren) => {
     } catch (error) {
       console.error('Error during login user', error);
       setIsLoading(false);
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Failed to login');
+      }
     }
   };
 
@@ -69,8 +78,15 @@ export const AuthContextProvider = ({ children }: ReactChildren) => {
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsLoading(false);
     } catch (error) {
-      console.error('Error during registring user', error);
+      console.error('Error during registering user', error);
       setIsLoading(false);
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Failed to register');
+      }
     }
   };
 
@@ -104,6 +120,18 @@ export const AuthContextProvider = ({ children }: ReactChildren) => {
     }
   };
 
+  const updateUser = (user: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        ...user,
+      };
+    });
+  };
+
   useEffect(() => {
     onLoadAuth();
   }, []);
@@ -117,6 +145,7 @@ export const AuthContextProvider = ({ children }: ReactChildren) => {
         logIn,
         logOut,
         register,
+        updateUser,
       }}
     >
       {children}
@@ -127,7 +156,7 @@ export const AuthContextProvider = ({ children }: ReactChildren) => {
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('Context error');
+    throw new Error('AuthContext error');
   }
   return context;
 };

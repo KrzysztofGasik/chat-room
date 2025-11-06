@@ -93,7 +93,7 @@ export const SocketContextProvider = ({ children }: ReactChildren) => {
 export const useSocketContext = () => {
   const context = useContext(SocketContext);
   if (!context) {
-    throw new Error('Context error');
+    throw new Error('SocketContext error');
   }
   return context;
 };

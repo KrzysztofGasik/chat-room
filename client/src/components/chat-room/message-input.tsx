@@ -2,9 +2,10 @@ import { Button, TextField, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useSocketContext } from '../../context/socket-context';
 import { useTypingBehavior } from '../../hooks/useTypingBehavior';
+import SendIcon from '@mui/icons-material/Send';
 
-export const MessageInput = ({ roomId }: { roomId: string }) => {
-  const { handleTyping, stopTyping } = useTypingBehavior(roomId);
+export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
+  const { handleTyping, stopTyping } = useTypingBehavior(roomId || '');
   const {
     register,
     handleSubmit,
@@ -36,11 +37,17 @@ export const MessageInput = ({ roomId }: { roomId: string }) => {
             }
           },
         })}
+        autoComplete="off"
       />
       {errors.message && (
         <Typography color="error">Message cannot be empty</Typography>
       )}
-      <Button type="submit" variant="contained" disabled={!watch('message')}>
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={!watch('message')}
+        endIcon={<SendIcon />}
+      >
         Send
       </Button>
     </form>

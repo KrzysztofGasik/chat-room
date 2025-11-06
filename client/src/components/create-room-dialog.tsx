@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
+import { useSnackbarContext } from '../context/snackbar-context';
 
 type CreateRoomDialogProps = {
   open: boolean;
@@ -32,6 +33,7 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
     formState: { errors },
     reset,
   } = useForm();
+  const { showSnackbar } = useSnackbarContext();
 
   const onSubmit = handleSubmit((data) => {
     createRoomMutation.mutate({
@@ -47,11 +49,15 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
       const response = await apiClient.post('/rooms', data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: { name: string; description?: string }) => {
       queryClient.invalidateQueries({ queryKey: ['get-all-rooms'] });
       queryClient.invalidateQueries({ queryKey: ['my-rooms'] });
+      showSnackbar(`Room ${data.name} created successfully`, 'success');
       reset();
       onClose();
+    },
+    onError: (data: { name: string; description?: string }) => {
+      showSnackbar(`Room ${data.name} creation failed`);
     },
   });
 

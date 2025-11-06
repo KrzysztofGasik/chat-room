@@ -16,11 +16,16 @@ import { useAuthContext } from '../../context/auth-context';
 import { useNavigate } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DoorFrontIcon from '@mui/icons-material/DoorFront';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import { useSnackbarContext } from '../../context/snackbar-context';
 
 export const Navbar = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const { user, logOut } = useAuthContext();
+  const { showSnackbar } = useSnackbarContext();
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -32,6 +37,7 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     await logOut();
+    showSnackbar('Successfully logged out', 'success');
     navigate('/signin');
   };
   return (
@@ -68,14 +74,23 @@ export const Navbar = () => {
               <Typography>{user?.email}</Typography>
             </MenuItem>
             <MenuItem onClick={handleCloseUserMenu}>
-              <Button onClick={() => navigate('/profile')}>Profile</Button>
+              <Button
+                onClick={() => navigate('/profile')}
+                endIcon={<AccountBoxIcon />}
+              >
+                Profile
+              </Button>
             </MenuItem>
             <MenuItem onClick={handleCloseUserMenu}>
-              <Button onClick={() => navigate('/')}>Rooms</Button>
+              <Button onClick={() => navigate('/')} endIcon={<DoorFrontIcon />}>
+                Rooms
+              </Button>
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleCloseUserMenu}>
-              <Button onClick={handleLogout}>Log out</Button>
+              <Button onClick={handleLogout} endIcon={<LogoutIcon />}>
+                Log out
+              </Button>
             </MenuItem>
           </Menu>
         </Box>

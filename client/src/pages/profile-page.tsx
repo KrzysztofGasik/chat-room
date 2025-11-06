@@ -3,9 +3,12 @@ import { useAuthContext } from '../context/auth-context';
 import { Box, Button, TextField } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
+import { useSnackbarContext } from '../context/snackbar-context';
 
 export const ProfilePage = () => {
-  const { user } = useAuthContext();
+  const { user, updateUser } = useAuthContext();
+  const { showSnackbar } = useSnackbarContext();
+  const queryClient = useQueryClient();
   const { register, reset, handleSubmit } = useForm({
     defaultValues: {
       username: user?.username,
@@ -14,16 +17,19 @@ export const ProfilePage = () => {
     },
   });
 
-  const queryClient = useQueryClient();
-
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { username: string; avatar?: string }) => {
       const response = await apiClient.patch(`/users/${user?.id}`, data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: { username: string; avatar?: string }) => {
+      updateUser(data);
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      showSnackbar('Profile updated successfully', 'success');
       reset();
+    },
+    onError: () => {
+      showSnackbar('Failed to update profile');
     },
   });
 

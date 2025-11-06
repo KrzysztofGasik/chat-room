@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Room } from '../types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
+import { useSnackbarContext } from '../context/snackbar-context';
 
 type RoomProps = {
   room: Room;
@@ -18,6 +19,7 @@ type RoomProps = {
 export const RoomItem = ({ room, isMember }: RoomProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbarContext();
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -26,6 +28,10 @@ export const RoomItem = ({ room, isMember }: RoomProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-rooms'] });
       queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
+      showSnackbar('Joined room successfully', 'success');
+    },
+    onError: () => {
+      showSnackbar('Failed to join room');
     },
   });
 
@@ -39,7 +45,7 @@ export const RoomItem = ({ room, isMember }: RoomProps) => {
       <CardContent>
         <Typography>Room name: {room.name}</Typography>
         <Typography>Room description: {room.description}</Typography>
-        <Typography>Room active members: {room._count?.roomMember}</Typography>
+        <Typography>Room members: {room._count?.roomMember}</Typography>
       </CardContent>
       <CardActions>
         {isMember ? (

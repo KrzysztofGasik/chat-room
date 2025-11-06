@@ -9,12 +9,17 @@ import { ChatRoomPage } from './pages/chat-room-page';
 import { SocketContextProvider } from './context/socket-context';
 import { ProfilePage } from './pages/profile-page';
 import { Navbar } from './components/navbar/navbar';
+import { AuthLayout } from './layout/auth-layout';
+import { MainLayout } from './layout/main-layout';
+import { SnackbarContextProvider } from './context/snackbar-context';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthContextProvider>
-        <AppContent />
+        <SnackbarContextProvider>
+          <AppContent />
+        </SnackbarContextProvider>
       </AuthContextProvider>
     </BrowserRouter>
   );
@@ -26,13 +31,29 @@ function AppContent() {
     <SocketContextProvider>
       {user && <Navbar />}
       <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route
+          path="/signin"
+          element={
+            <AuthLayout>
+              <SignIn />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <AuthLayout>
+              <SignUp />
+            </AuthLayout>
+          }
+        />
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <RoomsPage />
+              <AuthLayout>
+                <RoomsPage />
+              </AuthLayout>
             </ProtectedRoute>
           }
         />
@@ -40,7 +61,9 @@ function AppContent() {
           path="/rooms/:id"
           element={
             <ProtectedRoute>
-              <ChatRoomPage />
+              <MainLayout>
+                <ChatRoomPage />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -48,7 +71,9 @@ function AppContent() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <AuthLayout>
+                <ProfilePage />
+              </AuthLayout>
             </ProtectedRoute>
           }
         />

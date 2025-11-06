@@ -2,6 +2,8 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from '../../context/auth-context';
 import { Link, useNavigate } from 'react-router-dom';
+import LoginIcon from '@mui/icons-material/Login';
+import { useSnackbarContext } from '../../context/snackbar-context';
 
 export const SignIn = () => {
   const {
@@ -10,14 +12,20 @@ export const SignIn = () => {
     formState: { errors },
   } = useForm();
   const { logIn } = useAuthContext();
+  const { showSnackbar } = useSnackbarContext();
   const navigate = useNavigate();
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       await logIn(data.email, data.password);
+      showSnackbar('Successfully logged in', 'success');
       navigate('/');
     } catch (error) {
-      console.error('Login failed:', error);
+      if (error instanceof Error) {
+        showSnackbar(error.message);
+      } else {
+        showSnackbar('An unknown error occurred');
+      }
     }
   });
 
@@ -31,6 +39,7 @@ export const SignIn = () => {
           label="Your email"
           type="email"
           fullWidth
+          autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('email', { required: true })}
         />
@@ -41,13 +50,14 @@ export const SignIn = () => {
           label="Your password"
           type="password"
           fullWidth
+          autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('password', { required: true })}
         />
         {errors.password && (
           <Typography color="error">Password is required</Typography>
         )}
-        <Button type="submit" variant="contained">
+        <Button type="submit" variant="contained" endIcon={<LoginIcon />}>
           Login
         </Button>
       </form>

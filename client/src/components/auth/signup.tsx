@@ -1,7 +1,11 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from '../../context/auth-context';
 import { Link, useNavigate } from 'react-router-dom';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { useSnackbarContext } from '../../context/snackbar-context';
+import { VisibilityOff, Visibility } from '@mui/icons-material';
+import { useState } from 'react';
 
 export const SignUp = () => {
   const {
@@ -11,13 +15,20 @@ export const SignUp = () => {
   } = useForm();
   const { register: signUp } = useAuthContext();
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbarContext();
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       await signUp(data.username, data.email, data.password);
+      showSnackbar('Successfully registered', 'success');
       navigate('/');
     } catch (error) {
-      console.error('Login failed:', error);
+      if (error instanceof Error) {
+        showSnackbar(error.message);
+      } else {
+        showSnackbar('An unknown error occurred');
+      }
     }
   });
 
@@ -31,6 +42,7 @@ export const SignUp = () => {
           label="Your username"
           type="text"
           fullWidth
+          autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('username', { required: true })}
         />
@@ -41,6 +53,7 @@ export const SignUp = () => {
           label="Your email"
           type="email"
           fullWidth
+          autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('email', { required: true })}
         />
@@ -49,15 +62,42 @@ export const SignUp = () => {
         )}
         <TextField
           label="Your password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           fullWidth
+          autoComplete="off"
+          helperText="Min 8 chars: uppercase, lowercase, number & special character"
           sx={{ margin: '1rem 0' }}
-          {...register('password', { required: true })}
+          {...register('password', {
+            required: true,
+            pattern: {
+              value:
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+              message:
+                'Password must be at least 8 characters with uppercase, lowercase, number, and special character',
+            },
+          })}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton
+                  title={`${showPassword} ? 'hide the password' : 'display the password'`}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            },
+          }}
         />
-        {errors.password && (
+        {errors.password?.type === 'required' && (
           <Typography color="error">Password is required</Typography>
         )}
-        <Button type="submit" variant="contained">
+        {errors.password?.type === 'pattern' && (
+          <Typography color="error">
+            {String(errors.password.message)}
+          </Typography>
+        )}
+        <Button type="submit" variant="contained" endIcon={<HowToRegIcon />}>
           Sign up
         </Button>
       </form>
