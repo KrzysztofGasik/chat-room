@@ -44,6 +44,7 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
           borderRadius: 2,
           color: '#fff',
           textAlign: 'center',
+          wordBreak: 'break-all',
         }}
       >
         <Typography>{message.content}</Typography>

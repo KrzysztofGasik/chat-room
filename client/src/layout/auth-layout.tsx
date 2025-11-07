@@ -10,6 +10,9 @@ export const AuthLayout = ({ children }: ReactChildren) => {
         alignItems: 'center',
         height: '100vh',
         overflow: 'hidden',
+        '& body': {
+          overflow: 'hidden !important',
+        },
       }}
     >
       {children}

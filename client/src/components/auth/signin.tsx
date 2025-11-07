@@ -25,9 +25,9 @@ export const SignIn = () => {
       navigate('/');
     } catch (error) {
       if (error instanceof Error) {
-        showSnackbar(error.message);
+        showSnackbar(error.message, 'error');
       } else {
-        showSnackbar('An unknown error occurred');
+        showSnackbar('An unknown error occurred', 'error');
       }
     }
   });

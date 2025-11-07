@@ -63,7 +63,7 @@ export const ChatRoomPage = () => {
   }
 
   if (isError) {
-    showSnackbar('Failed to fetch the room info');
+    showSnackbar('Failed to fetch the room info', 'error');
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography color="error">Failed to load room</Typography>
@@ -72,7 +72,7 @@ export const ChatRoomPage = () => {
   }
 
   if (messageError) {
-    showSnackbar('Failed to fetch the messages info');
+    showSnackbar('Failed to fetch the messages info', 'error');
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography color="error">Failed to load messages</Typography>
@@ -83,7 +83,7 @@ export const ChatRoomPage = () => {
   const getTypingText = () => {
     const typingUsernames = Array.from(typingUsers)
       .map((userId) => userMap.get(userId) || 'Someone')
-      .filter((name) => name !== 'Someone'); // Only show if we know the name
+      .filter((name) => name !== 'Someone');
 
     if (typingUsernames.length === 0) return null;
 
@@ -153,7 +153,7 @@ export const ChatRoomPage = () => {
             {getTypingText() && (
               <Typography
                 variant="body1"
-                sx={{ fontStyle: 'italic', color: 'gray' }}
+                sx={{ fontStyle: 'italic', color: 'var(--font-color)' }}
               >
                 {getTypingText()}
               </Typography>

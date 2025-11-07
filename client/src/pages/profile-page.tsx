@@ -35,7 +35,7 @@ export const ProfilePage = () => {
       reset();
     },
     onError: () => {
-      showSnackbar('Failed to update profile');
+      showSnackbar('Failed to update profile', 'error');
     },
   });
 

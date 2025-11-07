@@ -41,11 +41,13 @@ export const Navbar = () => {
     navigate('/signin');
   };
   return (
-    <AppBar>
+    <AppBar sx={{ opacity: '0.75' }}>
       <Toolbar>
-        <Box sx={{ marginLeft: 'auto' }}>
+        <Box
+          sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'stretch' }}
+        >
           <Tooltip title="Open settings">
-            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 1 }}>
               <Avatar alt="avatar" src={`${user?.avatar}`} />
             </IconButton>
           </Tooltip>
@@ -79,7 +81,7 @@ export const Navbar = () => {
               <Button
                 onClick={() => navigate('/profile')}
                 startIcon={<AccountBoxIcon />}
-                sx={{ color: '#010101' }}
+                variant="contained"
               >
                 Profile
               </Button>
@@ -88,7 +90,7 @@ export const Navbar = () => {
               <Button
                 onClick={() => navigate('/')}
                 startIcon={<DoorFrontIcon />}
-                sx={{ color: '#010101' }}
+                variant="contained"
               >
                 Rooms
               </Button>
@@ -98,7 +100,7 @@ export const Navbar = () => {
               <Button
                 onClick={handleLogout}
                 startIcon={<LogoutIcon />}
-                sx={{ color: '#010101' }}
+                variant="contained"
               >
                 Log out
               </Button>

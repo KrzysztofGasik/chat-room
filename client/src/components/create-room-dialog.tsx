@@ -59,7 +59,7 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
       onClose();
     },
     onError: (data: { name: string; description?: string }) => {
-      showSnackbar(`Room ${data.name} creation failed`);
+      showSnackbar(`Room ${data.name} creation failed`, 'error');
     },
   });
 

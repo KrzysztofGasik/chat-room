@@ -5,7 +5,7 @@ export const MainLayout = ({ children }: ReactChildren) => {
   return (
     <Box
       sx={{
-        marginTop: { xs: '56px', md: '64px' },
+        marginTop: { xs: '56px', md: '100px' },
         height: { xs: 'auto', md: 'calc(100vh - 64px)' },
         color: 'var(--font-color)',
       }}

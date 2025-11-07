@@ -31,7 +31,7 @@ export const RoomItem = ({ room, isMember }: RoomProps) => {
       showSnackbar('Joined room successfully', 'success');
     },
     onError: () => {
-      showSnackbar('Failed to join room');
+      showSnackbar('Failed to join room', 'error');
     },
   });
 
