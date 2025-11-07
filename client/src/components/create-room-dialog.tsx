@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { useSnackbarContext } from '../context/snackbar-context';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 type CreateRoomDialogProps = {
   open: boolean;
@@ -89,7 +90,13 @@ export const CreateRoomDialog = ({ open, onClose }: CreateRoomDialogProps) => {
             {...register('description')}
           />
           <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button
+              onClick={onClose}
+              variant="contained"
+              endIcon={<CancelIcon sx={{ color: 'var(--font-color)' }} />}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               variant="contained"

@@ -41,18 +41,26 @@ export const RoomItem = ({ room, isMember }: RoomProps) => {
 
   const handleEnterRoom = () => navigate(`/rooms/${room.id}`);
   return (
-    <Card>
-      <CardContent>
+    <Card sx={{ display: 'flex', flexDirection: 'column', p: 1 }}>
+      <CardContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: 2,
+        }}
+      >
         <Typography>Room name: {room.name}</Typography>
         <Typography>Room description: {room.description}</Typography>
         <Typography>Room members: {room._count?.roomMember}</Typography>
       </CardContent>
       <CardActions>
-        {isMember ? (
-          <Button onClick={handleEnterRoom}>Enter</Button>
-        ) : (
-          <Button onClick={handleJoin}>Join</Button>
-        )}
+        <Button
+          onClick={isMember ? handleEnterRoom : handleJoin}
+          variant="contained"
+        >
+          {isMember ? 'Enter' : 'Join'}
+        </Button>
       </CardActions>
     </Card>
   );

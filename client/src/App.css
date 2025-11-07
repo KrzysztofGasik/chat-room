@@ -1,13 +1,15 @@
 :root {
   --background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+  --background-secondary: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --font-color: #f0f8ff;
 }
 
 body {
   color: var(--font-color);
   margin: 0;
-  height: 100vh;
+  /* height: 100vh; */
   background: var(--background);
+  overflow: hidden;
 }
 #root {
   max-width: 1280px;
@@ -16,4 +18,55 @@ body {
   text-align: center;
   color: var(--font-color);
   background-color: transparent;
+}
+
+.MuiInputLabel-root,
+.MuiInputLabel-root.Mui-focused,
+.MuiOutlinedInput-input {
+  color: var(--font-color) !important;
+}
+
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(240, 248, 255, 0.5) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--font-color) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--font-color) !important;
+  border-width: 2px !important;
+}
+
+.MuiFormHelperText-root {
+  color: rgba(240, 248, 255, 0.7) !important;
+}
+
+.MuiPaper-root.MuiCard-root {
+  background: var(--background-secondary) !important;
+}
+
+.MuiDialog-root .MuiInputLabel-root,
+.MuiDialog-root .MuiInputLabel-root.Mui-focused,
+.MuiDialog-root .MuiOutlinedInput-input {
+  color: inherit !important;
+}
+
+.MuiDialog-root .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: inherit !important;
+}
+
+.MuiDialog-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: inherit !important;
+}
+
+.MuiDialog-root
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: inherit !important;
+}
+
+.MuiDialog-root .MuiDialog-paper {
+  background: var(--background-secondary) !important;
 }

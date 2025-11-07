@@ -51,9 +51,9 @@ function AppContent() {
           path="/"
           element={
             <ProtectedRoute>
-              <AuthLayout>
+              <MainLayout>
                 <RoomsPage />
-              </AuthLayout>
+              </MainLayout>
             </ProtectedRoute>
           }
         />
