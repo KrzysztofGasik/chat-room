@@ -49,10 +49,13 @@ export const SignUp = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
           {...register('username', { required: true })}
+          helperText={
+            errors.username && (
+              <Typography color="error">Username is required</Typography>
+            )
+          }
         />
-        {errors.username && (
-          <Typography color="error">Username is required</Typography>
-        )}
+
         <TextField
           label="Your email"
           type="email"
@@ -64,19 +67,31 @@ export const SignUp = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
           {...register('email', { required: true })}
+          helperText={
+            errors.email && (
+              <Typography color="error">Email is required</Typography>
+            )
+          }
         />
-        {errors.email && (
-          <Typography color="error">Email is required</Typography>
-        )}
         <TextField
           label="Your password"
           type={showPassword ? 'text' : 'password'}
           fullWidth
           autoComplete="off"
           helperText={
-            <Typography sx={{ color: 'var(--font-color)' }}>
-              Min 8 chars: uppercase, lowercase, number & special character
-            </Typography>
+            <>
+              <Typography sx={{ color: 'var(--font-color)' }}>
+                Min 8 chars: uppercase, lowercase, number & special character
+              </Typography>
+              {errors.password?.type === 'required' && (
+                <Typography color="error">Password is required</Typography>
+              )}
+              {errors.password?.type === 'pattern' && (
+                <Typography color="error">
+                  {String(errors.password.message)}
+                </Typography>
+              )}
+            </>
           }
           sx={{ margin: '1rem 0' }}
           {...register('password', {
@@ -107,14 +122,7 @@ export const SignUp = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
         />
-        {errors.password?.type === 'required' && (
-          <Typography color="error">Password is required</Typography>
-        )}
-        {errors.password?.type === 'pattern' && (
-          <Typography color="error">
-            {String(errors.password.message)}
-          </Typography>
-        )}
+
         <Button type="submit" variant="contained" endIcon={<HowToRegIcon />}>
           Sign up
         </Button>

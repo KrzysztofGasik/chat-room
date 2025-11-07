@@ -42,7 +42,7 @@ export const MessageList = ({ isLoading, data, sx }: MessageListProps) => {
       sx={{
         ...sx,
         maxHeight: '100%',
-        margin: '0 auto',
+        margin: '2rem auto 0',
       }}
     >
       {[...data].reverse().map((message: Message) => (

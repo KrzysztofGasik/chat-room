@@ -35,7 +35,10 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
         }}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        <Avatar alt="avatar" src={`${user?.avatar}`} />
+        <Avatar
+          alt={message.user?.username || 'avatar'}
+          src={message.user?.avatar || undefined}
+        />
       </Badge>
       <Box
         sx={{

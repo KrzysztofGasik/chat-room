@@ -136,6 +136,7 @@ export const ChatRoomPage = () => {
               flex: 3,
               overflowY: 'auto',
               minHeight: 0,
+              top: '64px',
             }}
           >
             <MessageList
