@@ -4,7 +4,9 @@ import {
   DialogTitle,
   IconButton,
   TextField,
+  Tooltip,
   Typography,
+  type DialogProps,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useSocketContext } from '../../context/socket-context';
@@ -34,8 +36,15 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
     stopTyping();
     socket?.emit('send_message', { roomId, body: { content: data.message } });
     reset();
-    setEmoji([]); // Clear emoji array on submit
+    setEmoji([]);
   });
+
+  const handleClose: DialogProps['onClose'] = (_, reason) => {
+    if (reason && reason === 'backdropClick') {
+      return;
+    }
+    setShowEmoji(false);
+  };
 
   return (
     <form onSubmit={onSubmit}>
@@ -62,21 +71,24 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
       {errors.message && (
         <Typography color="error">Message cannot be empty</Typography>
       )}
-      <IconButton onClick={() => setShowEmoji((prev) => !prev)}>
-        <MoodIcon sx={{ color: '#fed734' }} />
-      </IconButton>
+      <Tooltip title="Select emoji" placement="top">
+        <IconButton onClick={() => setShowEmoji((prev) => !prev)}>
+          <MoodIcon sx={{ color: '#fed734' }} />
+        </IconButton>
+      </Tooltip>
       <Dialog
         open={showEmoji}
         fullWidth
         maxWidth="sm"
-        onClose={() => setShowEmoji(false)}
+        onClose={handleClose}
         scroll="paper"
         sx={{
           '& .MuiDialog-container': {
             alignItems: 'flex-start',
           },
         }}
-        PaperProps={{ sx: { mt: '50px' } }}
+        slotProps={{ paper: { sx: { mt: '50px' } } }}
+        className="react-emoji-picker-dialog"
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <IconButton onClick={() => setShowEmoji(false)}>
@@ -84,7 +96,7 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
           </IconButton>
         </DialogTitle>
         <EmojiPicker
-          width="100%"
+          className="react-emoji-picker"
           onEmojiClick={({ emoji }) => {
             const currentMessage = getValues('message') || '';
             const newMessage = currentMessage + emoji;
@@ -92,6 +104,7 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
             setEmoji((prev) => [...prev, emoji]);
             handleTyping();
           }}
+          searchDisabled
         />
       </Dialog>
 

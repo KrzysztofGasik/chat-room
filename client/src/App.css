@@ -70,8 +70,25 @@ body {
   background: var(--background-secondary) !important;
 }
 
+.react-emoji-picker {
+  margin: 0 auto;
+}
+
+.react-emoji-picker,
+.react-emoji-picker h2 {
+  background: var(--background-secondary);
+}
+
 @media (max-width: 900px) {
-  body {
-    height: 100vh;
+  .react-emoji-picker {
+    height: auto;
+    transform: scale(0.8);
+  }
+}
+
+@media (max-width: 600px) {
+  .react-emoji-picker {
+    height: auto;
+    transform: scale(0.7);
   }
 }
