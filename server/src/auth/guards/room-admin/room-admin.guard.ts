@@ -22,7 +22,7 @@ export class RoomAdminGuard implements CanActivate {
     const member = await this.prisma.roomMember.findUnique({
       where: { roomId_userId: { roomId: roomId, userId: user.id } },
     });
-    console.log(member, member?.role);
+
     if (!member || member.role !== 'admin') {
       throw new ForbiddenException('Only admin can perform this action');
     }

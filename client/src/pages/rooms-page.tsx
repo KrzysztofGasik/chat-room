@@ -73,9 +73,6 @@ export const RoomsPage = () => {
       }}
     >
       <Box>
-        <Typography>
-          You are logged as <b>{user?.username.toUpperCase()}</b>
-        </Typography>
         <Button
           variant="contained"
           onClick={() => setIsOpen(true)}

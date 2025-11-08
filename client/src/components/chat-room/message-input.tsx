@@ -1,17 +1,32 @@
-import { Button, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  IconButton,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useSocketContext } from '../../context/socket-context';
 import { useTypingBehavior } from '../../hooks/useTypingBehavior';
 import SendIcon from '@mui/icons-material/Send';
+import EmojiPicker from 'emoji-picker-react';
+import { useState } from 'react';
+import MoodIcon from '@mui/icons-material/Mood';
+import { CloseRounded } from '@mui/icons-material';
 
 export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
   const { handleTyping, stopTyping } = useTypingBehavior(roomId || '');
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [_, setEmoji] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     reset,
+    setValue,
+    getValues,
   } = useForm();
   const { socket } = useSocketContext();
 
@@ -19,6 +34,7 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
     stopTyping();
     socket?.emit('send_message', { roomId, body: { content: data.message } });
     reset();
+    setEmoji([]); // Clear emoji array on submit
   });
 
   return (
@@ -29,7 +45,7 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
         sx={{ margin: '1rem 0' }}
         slotProps={{
           input: { sx: { color: 'var(--font-color)' } },
-          inputLabel: { sx: { color: 'var(--font-color)' } },
+          inputLabel: { sx: { color: 'var(--font-color)' }, shrink: true },
         }}
         {...register('message', {
           required: true,
@@ -46,6 +62,39 @@ export const MessageInput = ({ roomId }: { roomId: string | undefined }) => {
       {errors.message && (
         <Typography color="error">Message cannot be empty</Typography>
       )}
+      <IconButton onClick={() => setShowEmoji((prev) => !prev)}>
+        <MoodIcon sx={{ color: '#fed734' }} />
+      </IconButton>
+      <Dialog
+        open={showEmoji}
+        fullWidth
+        maxWidth="sm"
+        onClose={() => setShowEmoji(false)}
+        scroll="paper"
+        sx={{
+          '& .MuiDialog-container': {
+            alignItems: 'flex-start',
+          },
+        }}
+        PaperProps={{ sx: { mt: '50px' } }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <IconButton onClick={() => setShowEmoji(false)}>
+            <CloseRounded />
+          </IconButton>
+        </DialogTitle>
+        <EmojiPicker
+          width="100%"
+          onEmojiClick={({ emoji }) => {
+            const currentMessage = getValues('message') || '';
+            const newMessage = currentMessage + emoji;
+            setValue('message', newMessage, { shouldValidate: true });
+            setEmoji((prev) => [...prev, emoji]);
+            handleTyping();
+          }}
+        />
+      </Dialog>
+
       <Button
         type="submit"
         variant="contained"
