@@ -11,8 +11,13 @@ import {
   type SxProps,
 } from '@mui/material';
 import type { Room } from '../../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useAuthContext } from '../../context/auth-context';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import apiClient from '../../api/client';
+import { useSnackbarContext } from '../../context/snackbar-context';
 
 type RoomDetailsProps = {
   data: Room | undefined;
@@ -20,13 +25,37 @@ type RoomDetailsProps = {
 };
 
 export const RoomDetails = ({ data, sx }: RoomDetailsProps) => {
+  const params = useParams();
+  const { user } = useAuthContext();
   if (!data) return null;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbarContext();
   const formattedDate = new Date(data.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+  const hasCreatedRoom = data.createdById === user?.id;
+  const deleteRoomMutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const response = await apiClient.delete(`/rooms/${data.id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['get-all-rooms'] });
+      queryClient.invalidateQueries({ queryKey: ['my-rooms'] });
+      showSnackbar(`Room deleted successfully`, 'success');
+    },
+    onError: () => {
+      showSnackbar(`Room deletion failed`, 'error');
+    },
+  });
+  const handleRemoveRoom = () => {
+    deleteRoomMutation.mutate({ id: params.id as string });
+    navigate('/');
+  };
+
   return (
     <Card
       sx={{
@@ -34,7 +63,6 @@ export const RoomDetails = ({ data, sx }: RoomDetailsProps) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 3,
       }}
     >
       <CardContent>
@@ -59,15 +87,34 @@ export const RoomDetails = ({ data, sx }: RoomDetailsProps) => {
         </List>
         <Divider sx={{ my: 1 }} />
       </CardContent>
-      <CardActions>
+      <CardActions
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+        disableSpacing
+      >
         <Button
           variant="outlined"
           color="error"
           onClick={() => navigate('/')}
           endIcon={<MeetingRoomIcon />}
+          fullWidth
         >
           Leave room
         </Button>
+        {hasCreatedRoom && (
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleRemoveRoom}
+            endIcon={<DeleteIcon />}
+            fullWidth
+          >
+            Remove room
+          </Button>
+        )}
       </CardActions>
     </Card>
   );

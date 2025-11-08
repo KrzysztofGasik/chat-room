@@ -122,6 +122,10 @@ export const ChatRoomPage = () => {
             }}
           />
         </Grid>
+        <Divider
+          orientation="vertical"
+          sx={{ margin: '0 1rem', borderWidth: '2px' }}
+        />
         <Grid
           size={{ xs: 12, md: 6 }}
           sx={{
@@ -136,7 +140,8 @@ export const ChatRoomPage = () => {
               flex: 3,
               overflowY: 'auto',
               minHeight: 0,
-              top: '64px',
+              position: { xs: 'static', md: 'sticky' },
+              top: '27px',
             }}
           >
             <MessageList
@@ -149,6 +154,7 @@ export const ChatRoomPage = () => {
           <Box
             sx={{
               flex: 1,
+              marginTop: '2rem',
             }}
           >
             {getTypingText() && (

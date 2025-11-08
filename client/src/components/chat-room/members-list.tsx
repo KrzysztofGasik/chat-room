@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   Card,
+  CardContent,
   ListItem,
   Typography,
   type SxProps,
@@ -19,6 +20,11 @@ export const MembersList = ({ members, sx }: MembersListProps) => {
   const { onlineUsers } = useSocketContext();
   return (
     <Card sx={sx}>
+      <CardContent>
+        <Typography variant="h5" sx={{ textAlign: 'left' }}>
+          Members
+        </Typography>
+      </CardContent>
       {members?.map((member) => (
         <ListItem key={member.user.id}>
           <MemberInfo

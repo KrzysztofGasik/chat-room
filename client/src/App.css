@@ -69,3 +69,9 @@ body {
 .MuiDialog-root .MuiDialog-paper {
   background: var(--background-secondary) !important;
 }
+
+@media (max-width: 900px) {
+  body {
+    height: 100vh;
+  }
+}

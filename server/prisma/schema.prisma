@@ -43,11 +43,11 @@ model Message {
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime
-  room      Room     @relation(fields: [roomId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 }
 
 model RoomMember {
-  room       Room     @relation(fields: [roomId], references: [id])
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId     String
   user       User     @relation(fields: [userId], references: [id])
   userId     String
