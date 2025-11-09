@@ -23,6 +23,7 @@ let ChatGateway = class ChatGateway {
     server;
     connectedUsers = new Map();
     roomPresence = new Map();
+    activeCalls = new Map();
     constructor(jwtService, prismaService, messagesService) {
         this.jwtService = jwtService;
         this.prismaService = prismaService;
@@ -71,6 +72,34 @@ let ChatGateway = class ChatGateway {
         if (filterSockets?.length === 0) {
             this.connectedUsers.delete(userId);
             this.server.emit('user_offline', { userId });
+            const calleeId = this.activeCalls.get(userId);
+            if (calleeId) {
+                this.activeCalls.delete(userId);
+                const calleeSockets = this.connectedUsers.get(calleeId);
+                if (calleeSockets && calleeSockets.length > 0) {
+                    calleeSockets[0].emit('video_call_ended', {
+                        endedBy: userId,
+                        targetUserId: calleeId,
+                        reason: 'user_disconnected',
+                    });
+                }
+            }
+            else {
+                for (const [callerId, calleeId] of this.activeCalls.entries()) {
+                    if (calleeId === userId) {
+                        this.activeCalls.delete(callerId);
+                        const callerSockets = this.connectedUsers.get(callerId);
+                        if (callerSockets && callerSockets.length > 0) {
+                            callerSockets[0].emit('video_call_ended', {
+                                endedBy: userId,
+                                targetUserId: callerId,
+                                reason: 'user_disconnected',
+                            });
+                        }
+                        break;
+                    }
+                }
+            }
         }
         else if (filterSockets && filterSockets?.length > 0) {
             this.connectedUsers.set(userId, filterSockets);
@@ -147,6 +176,125 @@ let ChatGateway = class ChatGateway {
             throw new common_1.UnauthorizedException('Not a member of this room');
         }
     }
+    async handleVideoCallRequest(client, payload) {
+        const { targetUserId } = payload;
+        const callerId = this.checkUserId(client);
+        if (targetUserId === callerId) {
+            client.emit('error', { message: 'Cannot call yourself' });
+            throw new common_1.BadRequestException('Cannot call yourself');
+        }
+        const targetSockets = this.connectedUsers.get(targetUserId);
+        if (!targetSockets || targetSockets.length === 0) {
+            client.emit('error', { message: 'User is not online' });
+            throw new common_1.BadRequestException('User is not online');
+        }
+        targetSockets[0].emit('user_request_video_call', { callerId });
+        this.activeCalls.set(callerId, targetUserId);
+        client.emit('video_call_request_sent', { targetUserId });
+    }
+    async handleVideoCallAnswer(client, payload) {
+        const { callerId, acceptCall } = payload;
+        const calleeId = this.checkUserId(client);
+        if (this.activeCalls.get(callerId) !== calleeId) {
+            client.emit('error', {
+                message: 'No active call',
+            });
+            throw new common_1.BadRequestException('No active call');
+        }
+        const callerSocket = this.connectedUsers.get(callerId);
+        if (!callerSocket || callerSocket.length === 0) {
+            client.emit('error', {
+                message: 'Caller is not online',
+            });
+            throw new common_1.BadRequestException('Caller is not online');
+        }
+        if (acceptCall) {
+            callerSocket[0]?.emit('video_call_accepted', { calleeId });
+        }
+        else {
+            callerSocket[0]?.emit('video_call_rejected', { calleeId });
+            this.activeCalls.delete(callerId);
+        }
+    }
+    async handleVideoCallOffer(client, payload) {
+        const { targetUserId, offer } = payload;
+        const callerId = this.checkUserId(client);
+        if (this.activeCalls.get(callerId) !== targetUserId) {
+            client.emit('error', {
+                message: 'No active call',
+            });
+            throw new common_1.BadRequestException('No active call');
+        }
+        const calleeSocket = this.connectedUsers.get(targetUserId);
+        if (!calleeSocket || calleeSocket.length === 0) {
+            client.emit('error', {
+                message: 'Callee is not online',
+            });
+            throw new common_1.BadRequestException('Callee is not online');
+        }
+        calleeSocket[0].emit('video_call_offer', { callerId, offer });
+    }
+    async handleVideoCallAnswerSdp(client, payload) {
+        const { callerId, answer } = payload;
+        const calleeId = this.checkUserId(client);
+        if (this.activeCalls.get(callerId) !== calleeId) {
+            client.emit('error', {
+                message: 'No active call',
+            });
+            throw new common_1.BadRequestException('No active call');
+        }
+        const callerSocket = this.connectedUsers.get(callerId);
+        if (!callerSocket || callerSocket.length === 0) {
+            client.emit('error', {
+                message: 'User is not online',
+            });
+            throw new common_1.BadRequestException('User is not online');
+        }
+        callerSocket[0].emit('video_call_answer_sdp', { calleeId, answer });
+    }
+    async handleVideoIceCandidate(client, payload) {
+        const { targetUserId, candidate } = payload;
+        const senderId = this.checkUserId(client);
+        if (this.activeCalls.get(senderId) !== targetUserId &&
+            this.activeCalls.get(targetUserId) !== senderId) {
+            client.emit('error', {
+                message: 'No active call',
+            });
+            throw new common_1.BadRequestException('No active call');
+        }
+        const targetSocket = this.connectedUsers.get(targetUserId);
+        if (!targetSocket || targetSocket.length === 0) {
+            client.emit('error', {
+                message: 'User is not online',
+            });
+            throw new common_1.BadRequestException('User is not online');
+        }
+        targetSocket[0].emit('video_ice_candidate', { senderId, candidate });
+    }
+    async handleVideoCallEnded(client, payload) {
+        const { targetUserId } = payload;
+        const userId = this.checkUserId(client);
+        const isCaller = this.activeCalls.get(userId) === targetUserId;
+        const isCallee = this.activeCalls.get(targetUserId) === userId;
+        if (!isCaller && !isCallee) {
+            client.emit('error', { message: 'No active call' });
+            throw new common_1.BadRequestException('No active call');
+        }
+        if (isCaller) {
+            this.activeCalls.delete(userId);
+        }
+        else {
+            this.activeCalls.delete(targetUserId);
+        }
+        client.emit('video_call_ended', { endedBy: userId, targetUserId });
+        const targetSockets = this.connectedUsers.get(targetUserId);
+        if (targetSockets && targetSockets.length > 0) {
+            targetSockets[0].emit('video_call_ended', {
+                endedBy: userId,
+                targetUserId,
+            });
+        }
+    }
 };
 exports.ChatGateway = ChatGateway;
 __decorate([
@@ -183,6 +331,42 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
     __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handleStopTyping", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_call_request'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoCallRequest", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_call_answer'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoCallAnswer", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_call_offer'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoCallOffer", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_call_answer_sdp'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoCallAnswerSdp", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_ice_candidate'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoIceCandidate", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('video_call_end'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleVideoCallEnded", null);
 exports.ChatGateway = ChatGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

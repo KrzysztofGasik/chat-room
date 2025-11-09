@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Socket, Server } from 'socket.io';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { CreateMessageDto } from 'src/dtos/create-message.dto';
 import { MessagesService } from 'src/messages/messages.service';
 
@@ -27,6 +27,7 @@ export class ChatGateway
 
   private connectedUsers: Map<string, Socket[]> = new Map();
   private roomPresence: Map<string, Set<string>> = new Map();
+  private activeCalls: Map<string, string> = new Map();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -84,12 +85,44 @@ export class ChatGateway
     if (filterSockets?.length === 0) {
       this.connectedUsers.delete(userId);
       this.server.emit('user_offline', { userId });
+
+      const calleeId = this.activeCalls.get(userId);
+      if (calleeId) {
+        // User was the caller
+        this.activeCalls.delete(userId);
+        const calleeSockets = this.connectedUsers.get(calleeId);
+        if (calleeSockets && calleeSockets.length > 0) {
+          calleeSockets[0].emit('video_call_ended', {
+            endedBy: userId,
+            targetUserId: calleeId,
+            reason: 'user_disconnected',
+          });
+        }
+      } else {
+        // Check if user was the callee
+        for (const [callerId, calleeId] of this.activeCalls.entries()) {
+          if (calleeId === userId) {
+            this.activeCalls.delete(callerId);
+            const callerSockets = this.connectedUsers.get(callerId);
+            if (callerSockets && callerSockets.length > 0) {
+              callerSockets[0].emit('video_call_ended', {
+                endedBy: userId,
+                targetUserId: callerId,
+                reason: 'user_disconnected',
+              });
+            }
+            break;
+          }
+        }
+      }
     } else if (filterSockets && filterSockets?.length > 0) {
       this.connectedUsers.set(userId, filterSockets);
     }
 
     console.log(`User ${userId} disconnected`);
   }
+
+  // Messages handlers
 
   @SubscribeMessage('join_room')
   async handleJoinRoom(client: Socket, roomId: string) {
@@ -168,6 +201,8 @@ export class ChatGateway
     client.to(roomId).emit('user_stopped_typing', { roomId, userId });
   }
 
+  // helpers
+
   private checkUserId(client: Socket) {
     const userId = client.data.userId;
     if (!userId) {
@@ -187,6 +222,169 @@ export class ChatGateway
     if (!isUserRoomMember) {
       client.emit('error', { message: 'Not a member of this room' });
       throw new UnauthorizedException('Not a member of this room');
+    }
+  }
+
+  // RTC handlers
+
+  @SubscribeMessage('video_call_request')
+  async handleVideoCallRequest(
+    client: Socket,
+    payload: { targetUserId: string },
+  ) {
+    const { targetUserId } = payload;
+    const callerId = this.checkUserId(client);
+
+    if (targetUserId === callerId) {
+      client.emit('error', { message: 'Cannot call yourself' });
+      throw new BadRequestException('Cannot call yourself');
+    }
+
+    const targetSockets = this.connectedUsers.get(targetUserId);
+
+    if (!targetSockets || targetSockets.length === 0) {
+      client.emit('error', { message: 'User is not online' });
+      throw new BadRequestException('User is not online');
+    }
+
+    targetSockets[0].emit('user_request_video_call', { callerId });
+
+    this.activeCalls.set(callerId, targetUserId);
+
+    client.emit('video_call_request_sent', { targetUserId });
+  }
+
+  @SubscribeMessage('video_call_answer')
+  async handleVideoCallAnswer(
+    client: Socket,
+    payload: { callerId: string; acceptCall: boolean },
+  ) {
+    const { callerId, acceptCall } = payload;
+    const calleeId = this.checkUserId(client);
+    if (this.activeCalls.get(callerId) !== calleeId) {
+      client.emit('error', {
+        message: 'No active call',
+      });
+      throw new BadRequestException('No active call');
+    }
+
+    const callerSocket = this.connectedUsers.get(callerId);
+    if (!callerSocket || callerSocket.length === 0) {
+      client.emit('error', {
+        message: 'Caller is not online',
+      });
+      throw new BadRequestException('Caller is not online');
+    }
+    if (acceptCall) {
+      callerSocket[0]?.emit('video_call_accepted', { calleeId });
+    } else {
+      callerSocket[0]?.emit('video_call_rejected', { calleeId });
+      this.activeCalls.delete(callerId);
+    }
+  }
+
+  @SubscribeMessage('video_call_offer')
+  async handleVideoCallOffer(
+    client: Socket,
+    payload: { targetUserId: string; offer: RTCSessionDescriptionInit },
+  ) {
+    const { targetUserId, offer } = payload;
+    const callerId = this.checkUserId(client);
+    if (this.activeCalls.get(callerId) !== targetUserId) {
+      client.emit('error', {
+        message: 'No active call',
+      });
+      throw new BadRequestException('No active call');
+    }
+
+    const calleeSocket = this.connectedUsers.get(targetUserId);
+    if (!calleeSocket || calleeSocket.length === 0) {
+      client.emit('error', {
+        message: 'Callee is not online',
+      });
+      throw new BadRequestException('Callee is not online');
+    }
+    calleeSocket[0].emit('video_call_offer', { callerId, offer });
+  }
+
+  @SubscribeMessage('video_call_answer_sdp')
+  async handleVideoCallAnswerSdp(
+    client: Socket,
+    payload: { callerId: string; answer: RTCSessionDescriptionInit },
+  ) {
+    const { callerId, answer } = payload;
+    const calleeId = this.checkUserId(client);
+    if (this.activeCalls.get(callerId) !== calleeId) {
+      client.emit('error', {
+        message: 'No active call',
+      });
+      throw new BadRequestException('No active call');
+    }
+
+    const callerSocket = this.connectedUsers.get(callerId);
+    if (!callerSocket || callerSocket.length === 0) {
+      client.emit('error', {
+        message: 'User is not online',
+      });
+      throw new BadRequestException('User is not online');
+    }
+    callerSocket[0].emit('video_call_answer_sdp', { calleeId, answer });
+  }
+
+  @SubscribeMessage('video_ice_candidate')
+  async handleVideoIceCandidate(
+    client: Socket,
+    payload: { targetUserId: string; candidate: RTCIceCandidateInit },
+  ) {
+    const { targetUserId, candidate } = payload;
+    const senderId = this.checkUserId(client);
+    if (
+      this.activeCalls.get(senderId) !== targetUserId &&
+      this.activeCalls.get(targetUserId) !== senderId
+    ) {
+      client.emit('error', {
+        message: 'No active call',
+      });
+      throw new BadRequestException('No active call');
+    }
+
+    const targetSocket = this.connectedUsers.get(targetUserId);
+    if (!targetSocket || targetSocket.length === 0) {
+      client.emit('error', {
+        message: 'User is not online',
+      });
+      throw new BadRequestException('User is not online');
+    }
+    targetSocket[0].emit('video_ice_candidate', { senderId, candidate });
+  }
+
+  @SubscribeMessage('video_call_end')
+  async handleVideoCallEnded(
+    client: Socket,
+    payload: { targetUserId: string },
+  ) {
+    const { targetUserId } = payload;
+    const userId = this.checkUserId(client);
+    const isCaller = this.activeCalls.get(userId) === targetUserId;
+    const isCallee = this.activeCalls.get(targetUserId) === userId;
+    if (!isCaller && !isCallee) {
+      client.emit('error', { message: 'No active call' });
+      throw new BadRequestException('No active call');
+    }
+    if (isCaller) {
+      this.activeCalls.delete(userId);
+    } else {
+      this.activeCalls.delete(targetUserId);
+    }
+
+    client.emit('video_call_ended', { endedBy: userId, targetUserId });
+
+    const targetSockets = this.connectedUsers.get(targetUserId);
+    if (targetSockets && targetSockets.length > 0) {
+      targetSockets[0].emit('video_call_ended', {
+        endedBy: userId,
+        targetUserId,
+      });
     }
   }
 }

@@ -13,9 +13,12 @@ import { useState } from 'react';
 import { CreateRoomDialog } from '../components/create-room-dialog';
 import { useAuthContext } from '../context/auth-context';
 import AddIcon from '@mui/icons-material/Add';
+import { JoinVideoChatDialog } from '../components/join-video-chat-dialog';
+import { VideoChatComponent } from '../components/video-chat-component';
 
 export const RoomsPage = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [openChat, setOpenChat] = useState<boolean>(false);
+  const [openVideo, setOpenVideo] = useState<boolean>(false);
   const { user } = useAuthContext();
   const { data, isLoading } = useQuery({
     queryKey: ['get-all-rooms'],
@@ -53,12 +56,25 @@ export const RoomsPage = () => {
         <Typography variant="h5">No rooms found</Typography>
         <Button
           variant="contained"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpenChat(true)}
           sx={{ margin: 1 }}
         >
           Create a room
         </Button>
-        <CreateRoomDialog onClose={() => setIsOpen(false)} open={isOpen} />
+        <Button
+          variant="contained"
+          onClick={() => {}}
+          sx={{ margin: 1 }}
+          endIcon={<AddIcon sx={{ color: 'var(--font-color)' }} />}
+        >
+          Start a video chat
+        </Button>
+        <CreateRoomDialog onClose={() => setOpenChat(false)} open={openChat} />
+        <JoinVideoChatDialog
+          onClose={() => setOpenVideo(false)}
+          open={openVideo}
+        />
+        <VideoChatComponent />
       </Box>
     );
   }
@@ -75,11 +91,23 @@ export const RoomsPage = () => {
       <Box>
         <Button
           variant="contained"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpenChat(true)}
           sx={{ margin: 1 }}
           endIcon={<AddIcon sx={{ color: 'var(--font-color)' }} />}
         >
           Create a room
+        </Button>
+      </Box>
+      <Box>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setOpenVideo(true);
+          }}
+          sx={{ margin: 1 }}
+          endIcon={<AddIcon sx={{ color: 'var(--font-color)' }} />}
+        >
+          Join a video chat
         </Button>
       </Box>
       <Stack spacing={2}>
@@ -91,7 +119,12 @@ export const RoomsPage = () => {
           />
         ))}
       </Stack>
-      <CreateRoomDialog onClose={() => setIsOpen(false)} open={isOpen} />
+      <CreateRoomDialog onClose={() => setOpenChat(false)} open={openChat} />
+      <JoinVideoChatDialog
+        onClose={() => setOpenVideo(false)}
+        open={openVideo}
+      />
+      <VideoChatComponent />
     </Box>
   );
 };

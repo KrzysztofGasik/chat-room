@@ -49,11 +49,8 @@ export const SignIn = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
           {...register('email', { required: true })}
-          helperText={
-            errors.email && (
-              <Typography color="error">Email is required</Typography>
-            )
-          }
+          helperText={errors.email ? 'Email is required' : ''}
+          error={!!errors.email}
         />
         <TextField
           label="Your password"
@@ -62,13 +59,8 @@ export const SignIn = () => {
           autoComplete="off"
           sx={{ margin: '1rem 0' }}
           {...register('password', { required: true })}
-          helperText={
-            errors.password && (
-              <Typography color="error" sx={{ width: '100%' }}>
-                Password is required
-              </Typography>
-            )
-          }
+          helperText={errors.password ? 'Password is required' : ''}
+          error={!!errors.password}
           slotProps={{
             input: {
               sx: { color: 'var(--font-color)' },
@@ -88,7 +80,11 @@ export const SignIn = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
         />
-        <Button type="submit" variant="contained" endIcon={<LoginIcon />}>
+        <Button
+          type="submit"
+          variant="contained"
+          endIcon={<LoginIcon sx={{ color: 'var(--font-color)' }} />}
+        >
           Login
         </Button>
       </form>

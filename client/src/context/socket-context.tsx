@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactChildren } from '../types';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
@@ -15,7 +15,7 @@ export type SocketContextType = {
 const SocketContext = React.createContext<SocketContextType | null>(null);
 
 export const SocketContextProvider = ({ children }: ReactChildren) => {
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
   const [socket, setSocket] = useState<Socket>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [onlineUsers, setOnlineUser] = useState<Set<string>>(new Set());
@@ -74,6 +74,15 @@ export const SocketContextProvider = ({ children }: ReactChildren) => {
       setOnlineUser(new Set());
     }
   }, [socket]);
+
+  // Auto-connect when user is logged in
+  useEffect(() => {
+    if (user && token && !socket) {
+      connect(token);
+    } else if (!user && socket) {
+      disconnect();
+    }
+  }, [user, token, socket, connect, disconnect]);
 
   return (
     <SocketContext.Provider

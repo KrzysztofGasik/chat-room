@@ -49,11 +49,8 @@ export const SignUp = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
           {...register('username', { required: true })}
-          helperText={
-            errors.username && (
-              <Typography color="error">Username is required</Typography>
-            )
-          }
+          helperText={errors.username ? 'Username is required' : ''}
+          error={!!errors.username}
         />
 
         <TextField
@@ -67,11 +64,8 @@ export const SignUp = () => {
             inputLabel: { sx: { color: 'var(--font-color)' } },
           }}
           {...register('email', { required: true })}
-          helperText={
-            errors.email && (
-              <Typography color="error">Email is required</Typography>
-            )
-          }
+          helperText={errors.email ? 'Email is required' : ''}
+          error={!!errors.email}
         />
         <TextField
           label="Your password"
@@ -79,20 +73,13 @@ export const SignUp = () => {
           fullWidth
           autoComplete="off"
           helperText={
-            <>
-              <Typography sx={{ color: 'var(--font-color)' }}>
-                Min 8 chars: uppercase, lowercase, number & special character
-              </Typography>
-              {errors.password?.type === 'required' && (
-                <Typography color="error">Password is required</Typography>
-              )}
-              {errors.password?.type === 'pattern' && (
-                <Typography color="error">
-                  {String(errors.password.message)}
-                </Typography>
-              )}
-            </>
+            errors.password?.type === 'required'
+              ? 'Password is required'
+              : errors.password?.type === 'pattern'
+              ? String(errors.password.message)
+              : 'Min 8 chars: uppercase, lowercase, number & special character'
           }
+          error={!!errors.password}
           sx={{ margin: '1rem 0' }}
           {...register('password', {
             required: true,
@@ -123,7 +110,11 @@ export const SignUp = () => {
           }}
         />
 
-        <Button type="submit" variant="contained" endIcon={<HowToRegIcon />}>
+        <Button
+          type="submit"
+          variant="contained"
+          endIcon={<HowToRegIcon sx={{ color: 'var(--font-color)' }} />}
+        >
           Sign up
         </Button>
       </form>

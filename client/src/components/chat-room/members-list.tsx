@@ -2,6 +2,7 @@ import {
   Avatar,
   Badge,
   Box,
+  Button,
   Card,
   CardContent,
   ListItem,
@@ -10,6 +11,7 @@ import {
 } from '@mui/material';
 import type { UserBasic } from '../../types';
 import { useSocketContext } from '../../context/socket-context';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
 
 type MembersListProps = {
   members: Array<{ user: UserBasic }> | undefined;
@@ -37,12 +39,16 @@ export const MembersList = ({ members, sx }: MembersListProps) => {
   );
 };
 
-const MemberInfo = ({
+export const MemberInfo = ({
   member,
   isOnline,
+  showCallButton = false,
+  handleCall,
 }: {
   member: UserBasic;
   isOnline: boolean;
+  showCallButton?: boolean;
+  handleCall?: (memberId: string) => void;
 }) => {
   return (
     <Box
@@ -67,6 +73,16 @@ const MemberInfo = ({
         <Avatar src={`${member.avatar}`} />
       </Badge>
       <Typography sx={{ ml: 1 }}>{member.username}</Typography>
+      {showCallButton ? (
+        <Button
+          variant="contained"
+          onClick={() => handleCall?.(member.id)}
+          sx={{ margin: 1 }}
+          endIcon={<VideoCallIcon sx={{ color: 'var(--font-color)' }} />}
+        >
+          Call
+        </Button>
+      ) : null}
     </Box>
   );
 };
