@@ -1,6 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 
+const getIceServers = (): RTCIceServer[] => {
+  const servers: RTCIceServer[] = [];
+
+  servers.push({ urls: 'stun:stun.l.google.com:19302' });
+
+  const turnUrl = import.meta.env.VITE_TURN_URL;
+  const turnUsername = import.meta.env.VITE_TURN_USERNAME;
+  const turnCredential = import.meta.env.VITE_TURN_CREDENTIAL;
+
+  if (turnUrl && turnUsername && turnCredential) {
+    servers.push({
+      urls: turnUrl,
+      username: turnUsername,
+      credential: turnCredential,
+    });
+  }
+
+  return servers;
+};
+
 export const useWebRTC = (socket: Socket | undefined) => {
   const [localStream, setLocalStream] = useState<MediaStream>();
   const [remoteStream, setRemoteStream] = useState<MediaStream>();
@@ -13,7 +33,11 @@ export const useWebRTC = (socket: Socket | undefined) => {
   const getLocalStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user',
+        },
         audio: true,
       });
 
@@ -26,7 +50,7 @@ export const useWebRTC = (socket: Socket | undefined) => {
 
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      iceServers: getIceServers(),
     });
 
     pc.ontrack = (event) => {

@@ -1,10 +1,17 @@
-import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+} from '@mui/material';
 import { useSocketContext } from '../context/socket-context';
 import { useWebRTC } from '../hooks/useWebRTC';
 import { useEffect, useRef } from 'react';
 import CallIcon from '@mui/icons-material/Call';
 import PhoneDisabledIcon from '@mui/icons-material/PhoneDisabled';
 import CallEndIcon from '@mui/icons-material/CallEnd';
+import { isMobileDevice } from '../utils/device-detection';
 
 export const VideoChatComponent = () => {
   const { socket } = useSocketContext();
@@ -21,6 +28,7 @@ export const VideoChatComponent = () => {
   const localStreamRef = useRef<HTMLVideoElement>(null);
   const remoteStreamRef = useRef<HTMLVideoElement>(null);
   const isOpen = isCallActive || isCallIncoming;
+  const isMobile = isMobileDevice();
 
   const setLocalVideoRef = (element: HTMLVideoElement | null) => {
     localStreamRef.current = element;
@@ -58,6 +66,12 @@ export const VideoChatComponent = () => {
           alignItems: 'center',
         }}
       >
+        {isMobile && isCallIncoming && (
+          <Alert severity="warning" sx={{ width: '100%' }}>
+            Video chat is not available on mobile devices. Please use a desktop
+            or laptop to accept video calls.
+          </Alert>
+        )}
         <video
           ref={setLocalVideoRef}
           autoPlay
@@ -93,6 +107,7 @@ export const VideoChatComponent = () => {
             <Button
               onClick={answerCall}
               variant="contained"
+              disabled={isMobile}
               endIcon={<CallIcon sx={{ color: 'var(--font-color)' }} />}
             >
               Accept call

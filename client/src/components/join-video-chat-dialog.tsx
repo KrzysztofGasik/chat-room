@@ -1,4 +1,5 @@
 import {
+  Alert,
   CircularProgress,
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { MemberInfo } from './chat-room/members-list';
 import type { UserBasic } from '../types';
 import { useAuthContext } from '../context/auth-context';
 import { CloseRounded } from '@mui/icons-material';
+import { isMobileDevice } from '../utils/device-detection';
 
 type JoinVideoChatDialogProps = {
   open: boolean;
@@ -51,6 +53,8 @@ export const JoinVideoChatDialog = ({
       filteredUser.id !== user?.id && onlineUsers.has(filteredUser.id)
   );
 
+  const isMobile = isMobileDevice();
+
   const handleCall = (targetUserId: string) => {
     socket?.emit('video_call_request', { targetUserId });
     onClose();
@@ -71,6 +75,12 @@ export const JoinVideoChatDialog = ({
         </IconButton>
       </DialogTitle>
       <DialogContent>
+        {isMobile && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Video chat is currently available on desktop devices only. Please
+            use a desktop or laptop computer to join video calls.
+          </Alert>
+        )}
         {onlineUsersList && onlineUsersList.length > 0 ? (
           <>
             <Typography>Select user for call</Typography>
@@ -79,7 +89,7 @@ export const JoinVideoChatDialog = ({
                 <MemberInfo
                   member={member}
                   isOnline={onlineUsers.has(member.id)}
-                  showCallButton
+                  showCallButton={!isMobile}
                   handleCall={handleCall}
                 />
               </ListItem>
