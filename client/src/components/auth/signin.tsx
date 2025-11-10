@@ -1,4 +1,11 @@
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from '../../context/auth-context';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,7 +18,7 @@ export const SignIn = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm();
   const { logIn } = useAuthContext();
   const { showSnackbar } = useSnackbarContext();
@@ -84,11 +91,12 @@ export const SignIn = () => {
           type="submit"
           variant="contained"
           endIcon={<LoginIcon sx={{ color: 'var(--font-color)' }} />}
+          disabled={isSubmitting}
         >
           Login
         </Button>
       </form>
-
+      {isSubmitting && <CircularProgress />}
       <Typography>
         Not registered? Click here to{' '}
         <Link to={'/signup'} style={{ color: 'var(--font-color)' }}>

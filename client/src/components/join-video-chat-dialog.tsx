@@ -96,7 +96,7 @@ export const JoinVideoChatDialog = ({
             ))}
           </>
         ) : (
-          <Typography>No users online, try later</Typography>
+          <Alert severity="info">No users online, try later</Alert>
         )}
       </DialogContent>
     </Dialog>
