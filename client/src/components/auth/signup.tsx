@@ -126,7 +126,11 @@ export const SignUp = () => {
           Sign up
         </Button>
       </form>
-      {isSubmitting && <CircularProgress />}
+      {isSubmitting && (
+        <Box sx={{ margin: '1rem auto' }}>
+          <CircularProgress />
+        </Box>
+      )}
       <Typography>
         Already registered? Click here to{' '}
         <Link to={'/signin'} style={{ color: 'var(--font-color)' }}>
