@@ -12,6 +12,7 @@ import { Navbar } from './components/navbar/navbar';
 import { AuthLayout } from './layout/auth-layout';
 import { MainLayout } from './layout/main-layout';
 import { SnackbarContextProvider } from './context/snackbar-context';
+import { ServerStatusBanner } from './components/server-status-banner';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function AppContent() {
   const { user } = useAuthContext();
   return (
     <SocketContextProvider>
+      <ServerStatusBanner />
       {user && <Navbar />}
       <Routes>
         <Route
