@@ -13,8 +13,7 @@
     "kill:server": "lsof -ti:3000 | xargs kill -9 || true",
     "build": "npm run build -w server && npm run build -w client",
     "build:server": "npm run build -w server",
-    "build:client": "npm run build -w client",
-    "deploy": "npm run build:client && cd server && npm run build && cd .. && git add . && echo 'Ready to commit!'"
+    "build:client": "npm run build -w client"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
